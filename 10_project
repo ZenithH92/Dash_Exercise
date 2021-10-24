@@ -18,9 +18,9 @@ app = dash.Dash(__name__)
 app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
                                         style={'textAlign': 'center', 'color': '#503D36',
                                                'font-size': 40}),
-                                # TASK 1: Add a dropdown list to enable Launch Site selection
+                               # TASK 1: Add a dropdown list to enable Launch Site selection
                                 # The default select value is for ALL sites
-                                  dcc.Dropdown(id='site-dropdown',
+                                dcc.Dropdown(id='site-dropdown',
                                                 options=[
                                                         {'label': 'All Sites', 'value': 'ALL'},
                                                         {'label': 'CCAFS LC-40', 'value': 'CCAFS LC-40'},
@@ -48,6 +48,7 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
 
                                 # TASK 4: Add a scatter chart to show the correlation between payload and launch success
                                 html.Div(dcc.Graph(id='success-payload-scatter-chart')),
+                                html.P("Payload range (Kg):"),
                                 ])
                                 
 
@@ -63,14 +64,28 @@ def get_pie_chart(entered_site):
                 title='title')
                 return fig
             else:
-                fig = px.pie(filter())
+                fig = px.pie(spacex_df, values=(count(class = 0), count(class = 1)), names='site-dropdown',
+                names='pie chart names', 
+                title='title')
+                return fig
                 # return the outcomes piechart for a selected site
-# TASK 4:
+# TASK 4:a
 # Add a callback function for `site-dropdown` and `payload-slider` as inputs, `success-payload-scatter-chart` as output
-# Function decorator to specify function input and output
+# Function decorator to specify function input and output\@app.callback(
+ @app.callback(
+    Output("scatter-plot", "figure"), 
+    [Input("range-slider", "value")])
+def update_bar_chart(slider_range):
+    low, high = slider_range
+    mask = (df['petal_width'] > low) & (df['petal_width'] < high)
+    fig = px.scatter(
+        df[mask], x="sepal_width", y="sepal_length", 
+        color="species", size='petal_length', 
+        hover_data=['petal_width'])
+    return fig
+
 
 
 # Run the app
 if __name__ == '__main__':
     app.run_server()
-
