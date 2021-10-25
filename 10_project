@@ -18,7 +18,7 @@ app = dash.Dash(__name__)
 app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
                                         style={'textAlign': 'center', 'color': '#503D36',
                                                'font-size': 40}),
-                               # TASK 1: Add a dropdown list to enable Launch Site selection
+                                # TASK 1: Add a dropdown list to enable Launch Site selection
                                 # The default select value is for ALL sites
                                 dcc.Dropdown(id='site-dropdown',
                                                 options=[
@@ -44,7 +44,7 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
                                                 min=0, max=10000, step=1000,
                                                 marks={0: '0',
                                                 100: '100'},
-                                                value=[min_payload, max_payload])
+                                                value=['min_payload', 'max_payload'])
 
                                 # TASK 4: Add a scatter chart to show the correlation between payload and launch success
                                 html.Div(dcc.Graph(id='success-payload-scatter-chart')),
@@ -59,32 +59,43 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
 def get_pie_chart(entered_site):
             filtered_df = spacex_df
             if entered_site == 'ALL':
-                fig = px.pie(spacex_df, values='class', 
-                names='pie chart names', 
-                title='title')
+                fig = px.pie(filtered_df, values='class', 
+                names='class', 
+                title='All Succssful vs Failed Launch')
                 return fig
-            else:
-                fig = px.pie(spacex_df, values=(count(class = 0), count(class = 1)), names='site-dropdown',
-                names='pie chart names', 
-                title='title')
-                return fig
-                # return the outcomes piechart for a selected site
-# TASK 4:a
+            else:                
+        # return the outcomes piechart for a selected site
+        filtered_df=spacex_df[spacex_df['Launch Site']== entered_site]
+        filtered_df=filtered_df.groupby(['Launch Site','class']).size().reset_index(name='count')
+        fig=px.pie(filtered_df,
+            values='count',
+            names='class',
+            title="Successful Vs Failed Launch")
+        return fig
+        # TASK 4:a
 # Add a callback function for `site-dropdown` and `payload-slider` as inputs, `success-payload-scatter-chart` as output
 # Function decorator to specify function input and output\@app.callback(
  @app.callback(
-    Output("scatter-plot", "figure"), 
-    [Input("range-slider", "value")])
+    Output(component_id='success-payload-scatter-chart', component_property='figure'), 
+    [Input(component_id='site-dropdown', component_property='value'), 
+    Input(component_id="payload-slider", component_property="value")]
 def update_bar_chart(slider_range):
-    low, high = slider_range
-    mask = (df['petal_width'] > low) & (df['petal_width'] < high)
-    fig = px.scatter(
-        df[mask], x="sepal_width", y="sepal_length", 
-        color="species", size='petal_length', 
-        hover_data=['petal_width'])
-    return fig
-
-
+    filtered_df = spacex_df
+            if entered_site == 'ALL':
+                fig = px.scatter(
+                mask = (spcaex_df['Payload Mass (kg)') & (spacex_df['class'])
+                df[mask],x = "Payload Mass (kg)", y "class", 
+                color="Booster Version Category"
+                )
+                return fig
+            else:
+                fig = px.scatter(
+                spacex_df, values=(count(class = 0), count(class = 1)), names='site-dropdown',
+                mask = (spcaex_df['Payload Mass (kg)') & (spacex_df['class'])
+                df[mask],x = "Payload Mass (kg)", y "class", 
+                color="Booster Version Category"
+                )
+                return fig
 
 # Run the app
 if __name__ == '__main__':
